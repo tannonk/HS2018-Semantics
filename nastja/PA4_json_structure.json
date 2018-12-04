@@ -1,0 +1,32 @@
+/*TEST SET*/
+{
+  "relation": "",
+  "entity_1": "Friuli-Venezia_Giulia",
+  "entity_2": "Trieste",
+  "snippet": [
+    {
+      "left": "Geronimo Mercuriali and Giovanni Battista Morgagni . Ronchi dei Legionari ( Gorizia ) ( 2011-present ) is a comune ( municipality ) in the Province of Gorizia in the Italian region",
+      "mention_1": "Friuli-Venezia Giulia",
+      "middle": ", located about 30 km northwest of",
+      "mention_2": "Trieste",
+      "right": "and about 14 km southwest of Gorizia . Follow Us on Twitter ! Categories Events Multimedia Neural network Operating system Weather Wii Tag Cloud 3d 2008/09 Aircraft",
+      "direction": "fwd"
+    }
+  ]
+}
+/* TRAINING DATA*/
+{
+  "relation": "has_spouse",
+  "entity_1": "Judy_Garland",
+  "entity_2": "David_Rose",
+  "snippet": [
+    {
+      "left": "thirty and his life and career were riding high . In 1941 , shortly after the death of his father , Mercer began an intense affair with nineteen-year-old",
+      "mention_1": "Judy Garland",
+      "middle": "while she was engaged to composer",
+      "mention_2": "David Rose",
+      "right": ". Garland married Rose to temporarily stop the affair , but the effect on Mercer lingered , adding to the emotional depth of his lyrics . Their affair",
+      "direction": "fwd"
+    }
+  ]
+}
