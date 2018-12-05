@@ -9,17 +9,24 @@ import numpy as np
 import random
 import os
 import json
+from pathlib import Path
 from scipy.sparse import csr_matrix
 
 from collections import Counter, defaultdict, namedtuple
+from gensim.utils import simple_preprocess
+from gensim.models import Word2Vec
+import spacy
 
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_recall_fscore_support, fbeta_score, make_scorer
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import cross_val_score, StratifiedKFold, KFold
-from sklearn.preprocessing import FunctionTransformer,LabelEncoder
+from sklearn.preprocessing import FunctionTransformer, LabelEncoder
+
+from sklearn.feature_selection import SelectFwe, SelectKBest
+from sklearn.feature_selection import chi2, f_classif, mutual_info_classif
 
 
 f_scorer = make_scorer(fbeta_score, beta=0.5, average='macro')
@@ -32,6 +39,9 @@ Snippet = namedtuple('Snippet',
 
 
 def load_data(file, verbose=False):
+    ''' Loads the data from .json file.
+        Returns: labels and data as separate variables.
+    '''
     f = open(file, 'r', encoding='utf-8')
     data = []
     labels = []
@@ -63,8 +73,9 @@ def load_data(file, verbose=False):
     return data, labels
 
 
-# Statistics over relations
 def print_stats(labels):
+    ''' Returns: statistics over relations
+    '''
     labels_counts = Counter(labels)
     print('{:20s} {:>10s} {:>10s}'.format('', '', 'rel_examples'))
     print('{:20s} {:>10s} {:>10s}'.format('relation', 'examples',
@@ -78,8 +89,10 @@ def print_stats(labels):
                                           len(labels) / len(labels)))
 
 
-# get full context
 def get_context(data):
+    ''' Get the full context for each instance. An instance can contain several
+        Snippets.
+    '''
     all_data = []
     for instance in data:
         s_context = []
@@ -92,8 +105,9 @@ def get_context(data):
     return all_data
 
 
-# Extract two simple features
 def ExractSimpleFeatures(data, verbose=False):
+    ''' Extract simple features.
+    '''
     featurized_data = []
     for instance in data:
         featurized_instance = {
@@ -123,6 +137,27 @@ def ExractSimpleFeatures(data, verbose=False):
         print(featurized_data[0])
 
     return featurized_data
+
+
+def train_word2vec(data):
+    ''' Input: list of contexts (each context is a string).
+        Prepares data for training embeddings: tokenize with simple_preprocessing.
+        Returns: embedding model
+    '''
+    data_tokenised = [simple_preprocess(doc, deacc=False, min_len=2,
+                      max_len=15) for doc in data]
+    # path_model = Path("models") / "Word2Vec.model"
+
+    # if path_model.exists():
+    #     model = Word2Vec.load(str(path_model))
+    # else:
+    #     if not path_model.parent.exists():
+    #         path_model.parent.mkdir(parents=True)
+
+    model = Word2Vec(data_tokenised, min_count=1, sg=1)
+        # model.save(str(path_model))
+
+    return model
 
 
 def print_statistics_header():
@@ -186,7 +221,7 @@ def evaluateCV(classifier, label_encoder, X, y, verbose=True):
 
 
 def evaluateCV_check(classifier, X, y, verbose=True):
-    kfold = StratifiedKFold(n_splits = 5, shuffle=True, random_state=0)
+    kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
     scores = cross_val_score(classifier, X, y, cv=kfold, scoring=f_scorer)
     print("\nCross-validation scores (StratifiedKFold): ", scores)
     print("Mean cv score (StratifiedKFold): ", scores.mean())
@@ -196,22 +231,16 @@ def main():
     train_data, train_labels = load_data('data/train.json.txt')
     print('Train set statistics:')
     print_stats(train_labels)
-    vectorizer = CountVectorizer()
     test_data, test_labels = load_data('data/test.json.txt', verbose=False)
 
     all_train = get_context(train_data)
     all_test = get_context(test_data)
 
-    vectorizer.fit(all_train)
-    # DATA Count vector
-    train_CV_vectorized = vectorizer.transform(all_train).toarray()
-    test_CV_vectorized = vectorizer.transform(all_test).toarray()
-
     # DATA ExractSimpleFeatures
     # train_simple_featurized = ExractSimpleFeatures(train_data, verbose=False)
     # test_simple_featurized = ExractSimpleFeatures(test_data, verbose=False)
-    # Transform labels to nimeric values
 
+    # Transform labels to nimeric values
     le = LabelEncoder()
     train_labels_featurized = le.fit_transform(train_labels)
 
@@ -219,18 +248,32 @@ def main():
     # clf = make_pipeline(DictVectorizer(), LogisticRegression())
 
     # if with CountVectorizer
-    clf = LogisticRegression()
+    bow_vectorizer = CountVectorizer(ngram_range=(1, 3),
+                                     # max_df=0.9
+                                     )
+    # TFiDF_vectorizer = TfidfVectorizer()
+
+    # With Word embeddings:
+    #embed_model = train_word2vec(all_train)
+
+    LR = LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0,
+                            fit_intercept=True, intercept_scaling=1,
+                            class_weight=None, random_state=None,
+                            solver='warn', max_iter=100, multi_class='warn',
+                            verbose=0, warm_start=False, n_jobs=None)
+
+    clf = make_pipeline(bow_vectorizer, LR)
 
     # CV
-    evaluateCV(clf, le, train_CV_vectorized, train_labels_featurized)
-    evaluateCV_check(clf, train_CV_vectorized, train_labels_featurized)
+    # evaluateCV(clf, le, all_train, train_labels_featurized)
+    evaluateCV_check(clf, all_train, train_labels_featurized)
 
     # TEST data
     # Fit final model on the full train data
-    clf.fit(train_CV_vectorized, train_labels_featurized)
+    clf.fit(all_train, train_labels_featurized)
 
     # Predict on test set
-    test_label_predicted = clf.predict(test_CV_vectorized)
+    test_label_predicted = clf.predict(all_test)
 
     # Deprecation warning explained: https://stackoverflow.com/questions/49545947/sklearn-deprecationwarning-truth-value-of-an-array
     test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
