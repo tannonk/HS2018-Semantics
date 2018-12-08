@@ -14,6 +14,7 @@ from scipy.sparse import csr_matrix
 
 from collections import Counter, defaultdict, namedtuple
 from gensim.utils import simple_preprocess
+import gensim.downloader as api
 from gensim.models import Word2Vec
 import spacy
 
@@ -89,19 +90,22 @@ def print_stats(labels):
                                           len(labels) / len(labels)))
 
 
-def get_context(data):
-    ''' Get the full context for each instance. An instance can contain several
-        Snippets.
-    '''
+# get full context
+def get_context(data, embed_mode=False):
     all_data = []
     for instance in data:
         s_context = []
         for s in instance.snippet:
-            s_context.append(' '.join((s.left, s.mention_1, s.middle,
-                                       s.mention_2, s.right)))
-            # s_context.append(' '.join((s.left, s.middle, s.right)))
+            if embed_mode:
+                s_context.append(' '.join((s.left, s.mention_1.replace(" ", "_"),
+                                           s.middle, s.mention_2.replace(" ", "_"),
+                                           s.right)))
+            else:
+                # s_context.append(' '.join((s.left, s.mention_1, s.middle, s.mention_2, s.right)))
+                s_context.append(' '.join((s.left, s.middle, s.right)))
         all_data.append(' '.join(s_context))
 
+    # print(len(all_data))
     return all_data
 
 
@@ -139,13 +143,11 @@ def ExractSimpleFeatures(data, verbose=False):
     return featurized_data
 
 
-def train_word2vec(data):
+def train_word2vec(data=None, pretrained=True):
     ''' Input: list of contexts (each context is a string).
         Prepares data for training embeddings: tokenize with simple_preprocessing.
         Returns: embedding model
     '''
-    data_tokenised = [simple_preprocess(doc, deacc=False, min_len=2,
-                      max_len=15) for doc in data]
     # path_model = Path("models") / "Word2Vec.model"
 
     # if path_model.exists():
@@ -153,11 +155,45 @@ def train_word2vec(data):
     # else:
     #     if not path_model.parent.exists():
     #         path_model.parent.mkdir(parents=True)
-
-    model = Word2Vec(data_tokenised, min_count=1, sg=1)
+    if pretrained:
+        model = api.load("glove-wiki-gigaword-100")
+    else:
+        data_tokenised = [doc.lower().split(" ") for doc in data]
+        model = Word2Vec(data_tokenised, size=100, min_count=1, sg=1)
         # model.save(str(path_model))
 
     return model
+
+
+def extract_embeddings_feature(data, embed_model, verbose=True):
+    ''' compute the average values of word embedding for words of each instance
+    '''
+    DIMEN_SIZE = 100
+    vectorized_data = np.zeros(shape=(len(data), DIMEN_SIZE))
+
+    for i, instance in enumerate(data):
+        instance_vector = []
+        for word in instance.split(" "):
+            if embed_model.wv.vocab.get(word, None) is not None:
+                word_vec = embed_model.wv.get_vector(word)
+            else:
+                word_vec = np.random.randn(embed_model.vector_size)
+            instance_vector.append(word_vec)
+
+        if len(instance_vector) > 0:
+            instance_array = np.array(instance_vector)
+            avg_vector = np.mean(instance_array, axis=0)
+        else:
+            avg_vector = np.zeros(embed_model.vector_size)
+
+        vectorized_data[i] = avg_vector
+        assert not np.isnan(avg_vector).any()
+
+    if verbose:
+        print(len(data))
+        print(len(vectorized_data))
+
+    return vectorized_data
 
 
 def print_statistics_header():
@@ -233,8 +269,8 @@ def main():
     print_stats(train_labels)
     test_data, test_labels = load_data('data/test.json.txt', verbose=False)
 
-    all_train = get_context(train_data)
-    all_test = get_context(test_data)
+    all_train = get_context(train_data, embed_mode=True)
+    # all_test = get_context(test_data, embed_mode=True)
 
     # DATA ExractSimpleFeatures
     # train_simple_featurized = ExractSimpleFeatures(train_data, verbose=False)
@@ -248,39 +284,42 @@ def main():
     # clf = make_pipeline(DictVectorizer(), LogisticRegression())
 
     # if with CountVectorizer
-    bow_vectorizer = CountVectorizer(ngram_range=(1, 3),
-                                     # max_df=0.9
-                                     )
+    # bow_vectorizer = CountVectorizer(ngram_range=(1, 3),
+    #                                  # max_df=0.9
+    #                                  )
     # TFiDF_vectorizer = TfidfVectorizer()
 
     # With Word embeddings:
-    #embed_model = train_word2vec(all_train)
+    embed_model = train_word2vec()
 
     LR = LogisticRegression(penalty='l2', dual=False, tol=0.0001, C=1.0,
                             fit_intercept=True, intercept_scaling=1,
                             class_weight=None, random_state=None,
-                            solver='warn', max_iter=100, multi_class='warn',
+                            solver='liblinear', max_iter=100, multi_class='ovr',
                             verbose=0, warm_start=False, n_jobs=None)
 
-    clf = make_pipeline(bow_vectorizer, LR)
+    X_train = extract_embeddings_feature(all_train, embed_model, verbose=True)
+
+    # clf = make_pipeline(bow_vectorizer, LR)
+    clf = LR
 
     # CV
-    # evaluateCV(clf, le, all_train, train_labels_featurized)
-    evaluateCV_check(clf, all_train, train_labels_featurized)
+    # evaluateCV(clf, le, X_train, train_labels_featurized)
+    evaluateCV_check(clf, X_train, train_labels_featurized)
 
     # TEST data
     # Fit final model on the full train data
-    clf.fit(all_train, train_labels_featurized)
+    # clf.fit(all_train, train_labels_featurized)
 
     # Predict on test set
-    test_label_predicted = clf.predict(all_test)
+    # test_label_predicted = clf.predict(all_test)
 
     # Deprecation warning explained: https://stackoverflow.com/questions/49545947/sklearn-deprecationwarning-truth-value-of-an-array
-    test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
-    print(test_label_predicted_decoded[:5])
-    f = open("test_labels.txt", 'w', encoding="utf-8")
-    for label in test_label_predicted_decoded:
-        f.write(label + '\n')
+    # test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
+    # print(test_label_predicted_decoded[:5])
+    # f = open("test_labels.txt", 'w', encoding="utf-8")
+    # for label in test_label_predicted_decoded:
+    #     f.write(label + '\n')
 
 
 if __name__ == "__main__":
