@@ -10,7 +10,10 @@ try and what results I get.
 | lemmatized  | 0.7664650091110985  |  |
 | BASELINE + EntityLength | 0.7818803012927732 | unions features |
 | BASELINE + EntityLength + SimpleFeats | 0.8108522380368186 |  |
-| ngram_range(1, 3) + EntityLength + SimpleFeats | 0.8549579216500934 |  |
+| BASELINE + EntityLength + SimpleFeats | 0.8279038078401164 |  |
+| ngram range(1, 3) + EntityLength + SimpleFeats | 0.8549579216500934 |  |
+| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.8716350652593686 |  |
+|  |  |  |
 
  
 ## Problems encountered:
