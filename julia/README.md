@@ -10,10 +10,10 @@ Here I will post the scores for my latest models, so you can see what I try and 
 | TFiDF  | 0.7518001918286948 | |
 | **ngram_range=(1, 3)** | **0.8100545275185225** | the best results so far |
 | max_df=0.7  | 0.7801255472002808 | |
-| word2vec (trained on our data) | 0.7004649820878264 | (tested on train data only!!!) |
-| pretrained word2vec |   | context words vectorized (without entities) |
+| word2vec (trained on our data) | 0.7004649820878264 | only entities are vectorized; tested on train data only |
+| pretrained word2vec | 0.5483315593034295 | context words vectorized (without entities; see more below) |
 
-#### Embeddings
+## 1. Embeddings
 When word embeddings are used, there are two vectors for each snippet (for entities). Here we should decide how to concatenate them: 1) can be multiplied; 2) similarity (I do not think it helps in this case); 3) ...
 Another question how to tie all snippets within one instance.
 
@@ -25,7 +25,7 @@ Other difficulties with word embeddings:
 only 0.5483315593034295 with CV on all train data.
 
 
-#### Overfitting using entities
+## 2. Overfitting using entities
 To check this issue, I evaluated the results on the development dataset. (To get dev data, I had to split the train data: 0.8-train, 0.2-dev; the provided test are not labeled). With CountVectorizer(1, 3) I did not notice any sufficient difference between train and test evaluation:
 
 |  | with entities | without entities |
