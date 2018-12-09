@@ -14,6 +14,7 @@ try and what results I get.
 | ngram range(1, 3) + EntityLength + SimpleFeats | 0.8549579216500934 |  |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.8716350652593686 |  |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats | 0.8721445323326972 |  |
+| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.869709024613503 |  |
 
 
 ## Approach:
