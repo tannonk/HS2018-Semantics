@@ -13,5 +13,3 @@ try and what results I get.
 ## Problems encountered:
 NER Labelling: J&M suggest using named entity types and their
 concetenation as features. So far, I haven't been able to reliably extract these labels.
-
-
