@@ -15,7 +15,16 @@ try and what results I get.
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.8716350652593686 |  |
 |  |  |  |
 
- 
+
+## Approach:
+
+Load data, splitting snippets as new instances. Results in ~ 43320 samples
+Features:
+BOW with ngrams: CountVectorizer(ngram_range(1, 3))
+Entity length: number of words in each entity and their concatenation
+Simple features: considers aspects of middle segments (adapted from PA4\_explained)
+Dependency length: length of shortest path between mentions 
+
 ## Problems encountered:
 NER Labelling: J&M suggest using named entity types and their
 concetenation as features. So far, I haven't been able to reliably extract these labels.
