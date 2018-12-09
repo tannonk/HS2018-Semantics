@@ -1,9 +1,9 @@
-                        Precision   Reacall    F-score
+                        Precision   Recall    F-score
 
 
 Baseline: clf = make_pipeline(CountVectorizer(), LogisticRegression())
 
-macro-average             0.789      0.736      0.775
+macro-average							0.789      0.736      0.775
 
 
 clf = make_pipeline(CountVectorizer(), TfidfTransformer(), LogisticRegression())
