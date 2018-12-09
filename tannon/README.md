@@ -8,7 +8,9 @@ try and what results I get.
 | BASELINE  | 0.7745792487781428 |  |
 | +tfidfvectorizor | 0.750413578679886 | |
 | lemmatized  | 0.7664650091110985  |  |
- 
+| BASELINE + EntityLength | 0.7818803012927732 | unions features |
+
+
  
 ## Problems encountered:
 NER Labelling: J&M suggest using named entity types and their

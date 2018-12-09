@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ### this script sets a baseline for realation extraction using frequency-based BOW model
+# ### this script sets a baseline for relation extraction using frequency-based BOW model
 # 
 # #### add additional features
 
