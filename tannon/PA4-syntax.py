@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # Anastassia Shaitarova, Julia Nigmatunlina, Tannon Kew
-# To Run: python3 PA4-no_syntax.py test_labels.txt
+# To Run: python3 PA4-syntax.py test_labels.txt
 
 
 # In[4]:
