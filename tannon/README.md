@@ -13,7 +13,7 @@ try and what results I get.
 | BASELINE + EntityLength + SimpleFeats | 0.8279038078401164 |  |
 | ngram range(1, 3) + EntityLength + SimpleFeats | 0.8549579216500934 |  |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.8716350652593686 |  |
-|  |  |  |
+| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats | 0.8721445323326972 |  |
 
 
 ## Approach:
