@@ -28,7 +28,10 @@ macro-average             0.892      0.827      0.869      42338
 Cross-validation scores (StratifiedKFold):  [0.87063928 0.86262372 0.87227253 0.87095741 0.86798517]
 Mean cv score (StratifiedKFold):  0.868895622946009
 ****************************************
-9754
-9754
-9754
-['capital' 'worked_at']
+Test data successfully loaded.
+42338 sample in test_data
+****************************************
+9754 predictions made on test_data
+****************************************
+Predictions written to file outputs/labels-no_syntax.txt
+****************************************

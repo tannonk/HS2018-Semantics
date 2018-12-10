@@ -382,7 +382,7 @@ print("Test data successfully loaded.")
 print("{} sample in test_data".format(len(train_data)))
 print('*'*40)
 test_label_predicted = clf.predict(test_data)
-print(len(test_label_predicted))
+# print(len(test_label_predicted))
 # Deprecation warning explained: https://stackoverflow.com/questions/49545947/sklearn-deprecationwarning-truth-value-of-an-array
 test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
 print("{} predictions made on test_data".format(len(test_label_predicted_decoded)))
@@ -393,7 +393,7 @@ with open(outfile, 'w', encoding="utf-8") as f:
     for label in test_label_predicted_decoded:
         f.write(label+'\n')
 
-print("Predictions written to file {}".format(outfile)
+print("Predictions written to file {}".format(outfile))
 print('*'*40)
 
 
