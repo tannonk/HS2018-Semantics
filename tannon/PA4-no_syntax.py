@@ -156,11 +156,16 @@ def ExractSimpleFeatures(data, verbose=True):
     """Considers length and words of middle segment"""
     featurized_data = []
     for instance in data:
-        featurized_instance = {'mid_words': '', 'distance': np.inf}
+        featurized_instance = {'mid_words': '', 'distance': np.inf, 'direction': 0}
         for s in instance.snippet:
             if len(s.middle.split()) < featurized_instance['distance']:
                 featurized_instance['mid_words'] = s.middle
                 featurized_instance['distance'] = len(s.middle.split())
+            if s.direction == 'fwd':
+                featurized_instance['direction'] = 1
+            else:
+                featurized_instance['direction'] = 0
+
         featurized_data.append(featurized_instance)
     if verbose:
         print(len(featurized_data))
@@ -256,9 +261,6 @@ length_pipe = make_pipeline(EntityLengthFeaturizer(LengthOfEntities), DictVector
 bow_pipe = make_pipeline(BowFeaturizer(SelectContext), CountVectorizer(ngram_range=(1,3)))
 
 simple_pipe = make_pipeline(SimpleFeaturizer(ExractSimpleFeatures), DictVectorizer())
-
-syntax_pipe = make_pipeline(DependencyPath(UseNLP), DictVectorizer())
-
 
 clf = make_pipeline(FeatureUnion(transformer_list=[
     ('length_pipeline', length_pipe),
@@ -376,18 +378,23 @@ clf.fit(train_data, train_labels_featurized)
 
 # Predict on test set
 test_data, test_labels = load_data('../data/test-covered.json.txt', verbose=False)
-print(len(test_labels))
-# test_data_featurized = SelectContext(test_data, verbose=False)
+print("Test data successfully loaded.")
+print("{} sample in test_data".format(len(train_data)))
+print('*'*40)
 test_label_predicted = clf.predict(test_data)
 print(len(test_label_predicted))
 # Deprecation warning explained: https://stackoverflow.com/questions/49545947/sklearn-deprecationwarning-truth-value-of-an-array
 test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
-print(len(test_label_predicted_decoded))
-print(test_label_predicted_decoded[:2])
+print("{} predictions made on test_data".format(len(test_label_predicted_decoded)))
+print('*'*40)
 
+# print(test_label_predicted_decoded[:2])
 with open(outfile, 'w', encoding="utf-8") as f:
     for label in test_label_predicted_decoded:
         f.write(label+'\n')
+
+print("Predictions written to file {}".format(outfile)
+print('*'*40)
 
 
 # In[ ]:

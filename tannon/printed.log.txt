@@ -1,0 +1,34 @@
+****************************************
+Training data successfully loaded.
+42338 sample in train_data
+****************************************
+Train set statistics:
+                                rel_examples
+relation               examples /all_examples
+--------               --------    -------
+has_spouse                13061       0.31
+author                    13113       0.31
+NO_REL                     3068       0.07
+capital                    9427       0.22
+worked_at                  3669       0.09
+--------               --------    -------
+Total                     42338       1.00
+****************************************
+relation              precision     recall    f-score    support
+------------------    ---------  ---------  ---------  ---------
+NO_REL                    0.776      0.398      0.652       3068
+author                    0.933      0.971      0.941      13113
+capital                   0.938      0.972      0.945       9427
+has_spouse                0.910      0.978      0.923      13061
+worked_at                 0.903      0.815      0.884       3669
+------------------    ---------  ---------  ---------  ---------
+macro-average             0.892      0.827      0.869      42338
+****************************************
+
+Cross-validation scores (StratifiedKFold):  [0.87063928 0.86262372 0.87227253 0.87095741 0.86798517]
+Mean cv score (StratifiedKFold):  0.868895622946009
+****************************************
+9754
+9754
+9754
+['capital' 'worked_at']

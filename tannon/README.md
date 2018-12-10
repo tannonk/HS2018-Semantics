@@ -1,7 +1,6 @@
 ## Evaluation: Tannon's models
 ## 
-Here I will post the scores for my latest models, so you can see what I
-try and what results I get.
+Scores for tested models.
 
 | **model**  | **score** Mean cv score (StratifiedKFold)| **comments** |
 | -------- | -------- | -------- |
@@ -13,7 +12,7 @@ try and what results I get.
 | BASELINE + EntityLength + SimpleFeats | 0.8279038078401164 |  |
 | ngram range(1, 3) + EntityLength + SimpleFeats | 0.8549579216500934 |  |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.8716350652593686 |  |
-| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats | 0.8721445323326972 |  |
+| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats | 0.8721445323326972 | best result but very time consuming |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats | 0.869709024613503 |  |
 
 
@@ -23,8 +22,8 @@ Load data, splitting snippets as new instances. Results in ~ 43320 samples
 Features:
 BOW with ngrams: CountVectorizer(ngram_range(1, 3))
 Entity length: number of words in each entity and their concatenation
-Simple features: considers aspects of middle segments (adapted from PA4\_explained)
-Dependency length: length of shortest path between mentions 
+Simple features: considers aspects of middle segments and direction (adapted from PA4\_explained)
+<!-- Dependency length: length of shortest path between mentions  -->
 
 ## Problems encountered:
 NER Labelling: J&M suggest using named entity types and their

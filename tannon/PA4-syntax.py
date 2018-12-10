@@ -474,18 +474,23 @@ clf.fit(train_data, train_labels_featurized)
 
 # Predict on test set
 test_data, test_labels = load_data('../data/test-covered.json.txt', verbose=False)
-print(len(test_data))
-print(len(test_labels))
-# test_data_featurized = SelectContext(test_data, verbose=False)
+print("Test data successfully loaded.")
+print("{} sample in test_data".format(len(train_data)))
+print('*'*40)
 test_label_predicted = clf.predict(test_data)
 print(len(test_label_predicted))
 # Deprecation warning explained: https://stackoverflow.com/questions/49545947/sklearn-deprecationwarning-truth-value-of-an-array
 test_label_predicted_decoded = le.inverse_transform(test_label_predicted)
-print(len(test_label_predicted_decoded))
-print(test_label_predicted_decoded[:2])
-f = open("outputs/test_labels2.txt", 'w', encoding="utf-8")
-for label in test_label_predicted_decoded:
-    f.write(label+'\n')
+print("{} predictions made on test_data".format(len(test_label_predicted_decoded)))
+print('*'*40)
+
+# print(test_label_predicted_decoded[:2])
+with open(outfile, 'w', encoding="utf-8") as f:
+    for label in test_label_predicted_decoded:
+        f.write(label+'\n')
+
+print("Predictions written to file {}".format(outfile)
+print('*'*40)
 
 
 # In[ ]:
