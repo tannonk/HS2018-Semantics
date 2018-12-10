@@ -266,8 +266,6 @@ def UseNLP(data, verbose=True):
 
         featurized_data.append(featurized_instance)
 
-        if len(featurized_data)%5000 == 0:
-            print("{} instances processed for nlp.".format(len(featurized_data)))
 
     if verbose:
         print(len(featurized_data))
