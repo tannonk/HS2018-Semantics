@@ -393,7 +393,7 @@ with open(outfile, 'w', encoding="utf-8") as f:
     for label in test_label_predicted_decoded:
         f.write(label+'\n')
 
-print("Predictions written to file {}".format(outfile)
+print("Predictions written to file {}".format(outfile))
 print('*'*40)
 
 
