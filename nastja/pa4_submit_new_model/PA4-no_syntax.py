@@ -2,6 +2,8 @@
 # coding: utf-8
 
 # Anastassia Shaitarova, Julia Nigmatunlina, Tannon Kew
+# the script takes about 14 min to run
+# the stdout results can also be seen in printed.log.txt
 ##
 # To Run:
 # pass train data, test data, and outfile for labels to the script
