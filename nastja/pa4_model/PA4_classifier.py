@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Anastassia Shaitarova, Julia Nigmatunlina, Tannon Kew
+# Anastassia Shaitarova, Julia Nigmatulina, Tannon Kew
 # the script takes about 14 min to run
 # the stdout results can also be seen in printed.log.txt
 ##
 # To Run:
 # pass train data, test data, and outfile for labels to the script
-# python3 PA4-no_syntax.py train.json.txt test-covered.json.txt test_labels.txt
-
-# In[4]:
-
+# python3 PA4_classifier.py train.json.txt test-covered.json.txt test_labels.txt
 
 import gzip
 import numpy as np
@@ -40,11 +37,8 @@ except IndexError:
     sys.exit(0)
 
 
-# In[5]:
-
-
 ##################################################################################################
-# 1. LOAD DATA ALTERED
+# 1. LOAD TRAINING DATA ALTERED
 ##################################################################################################
 
 PairExample = namedtuple('PairExample',
@@ -84,8 +78,39 @@ print("Training data successfully loaded.")
 print("{} sample in train_data".format(len(train_data)))
 print('*'*40)
 
-# In[6]:
+##################################################################################################
+# 1.1 LOAD TEST DATA
+##################################################################################################
 
+def load_test_data(file, verbose=True):
+    f = open(file,'r', encoding='utf-8')
+    data = []
+    labels = []
+    for i,line in enumerate(f):
+        instance = json.loads(line)
+        if i==0:
+            if verbose:
+                print('json example:')
+                print(instance)
+        #'relation, entity_1, entity_2, snippet' fileds for each example
+        #'left, mention_1, middle, mention_2, right, direction' for each snippet
+        instance_tuple = PairExample(instance['entity_1'],instance['entity_2'],[])
+        for snippet in instance['snippet']:
+            try:
+                snippet_tuple = Snippet(snippet['left'],snippet['mention_1'],snippet['middle'],
+                                   snippet['mention_2'],snippet['right'],
+                                    snippet['direction'])
+                instance_tuple.snippet.append(snippet_tuple)
+            except:
+                print(instance)
+        if i==0:
+            if verbose:
+                print('\nexample transformed as a named tuple:')
+                print(instance_tuple)
+        data.append(instance_tuple)
+        labels.append(instance['relation'])
+
+    return data, labels
 
 # Statistics over relations
 def print_stats(labels):
@@ -101,9 +126,6 @@ def print_stats(labels):
 print('Train set statistics:')
 print_stats(train_labels)
 print('*'*40)
-
-
-# In[7]:
 
 
 ## check that each entity pair is assigned only one relation
@@ -127,9 +149,9 @@ print('*'*40)
 #     ex = rel_dict[rel][0]
 #     print(rel,ex.entity_1,ex.entity_2)
 
-
-# In[8]:
-
+##################################################################################################
+# 2. EXTRACT FEATURES and BUILD CLASSIFIER
+##################################################################################################
 
 def SelectContext(data, verbose=True):
     """BOW feature extraction"""
@@ -147,15 +169,7 @@ def SelectContext(data, verbose=True):
         print(only_context_data[0])
     return only_context_data
 
-
-# In[186]:
-
-
 # test_feat = SelectContext(train_data[:200])
-
-
-# In[9]:
-
 
 def ExractSimpleFeatures(data, verbose=True):
     """Considers length and words of middle segment"""
@@ -178,15 +192,7 @@ def ExractSimpleFeatures(data, verbose=True):
         print(featurized_data[1])
     return featurized_data
 
-
-# In[12]:
-
-
 # test_feat = ExractSimpleFeatures(train_data[:200])
-
-
-# In[13]:
-
 
 def LengthOfEntities(data, verbose=True):
     featurized_data = []
@@ -203,15 +209,7 @@ def LengthOfEntities(data, verbose=True):
         print(featurized_data[1])
     return featurized_data
 
-
-# In[14]:
-
-
 # test_feat = LengthOfEntities(train_data[:200])
-
-
-# In[40]:
-
 
 class SimpleFeaturizer(BaseEstimator, TransformerMixin):
     def __init__(self, featurizer):
@@ -222,9 +220,6 @@ class SimpleFeaturizer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         return ExractSimpleFeatures(X, verbose=False)
-
-
-# In[41]:
 
 
 class EntityLengthFeaturizer(BaseEstimator, TransformerMixin):
@@ -239,9 +234,6 @@ class EntityLengthFeaturizer(BaseEstimator, TransformerMixin):
         return LengthOfEntities(X, verbose=False)
 
 
-# In[42]:
-
-
 class BowFeaturizer(BaseEstimator, TransformerMixin):
     """BOW featurizer"""
     def __init__(self, featurizer):
@@ -252,9 +244,6 @@ class BowFeaturizer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         return SelectContext(X, verbose=False)
-
-
-# In[44]:
 
 
 # Transform labels to numeric values
@@ -272,9 +261,6 @@ clf = make_pipeline(FeatureUnion(transformer_list=[
     ('bow_pipeline', bow_pipe),
     ('simple_pipeline', simple_pipe)]),
     LogisticRegression())
-
-
-# In[45]:
 
 ##################################################################################################
 # 3. TRAIN CLASSIFIER AND EVALUATE (CV)
@@ -313,7 +299,6 @@ def evaluateCV(classifier, label_encoder, X, y, verbose=True):
     """
     results = {}
     for rel in le.classes_:
-#         print(rel)
         results[rel] = []
     if verbose:
         print_statistics_header()
@@ -341,19 +326,11 @@ def evaluateCV(classifier, label_encoder, X, y, verbose=True):
     return avg_result[2]  # return f_0.5 score as summary statistic
 
 
-# In[ ]:
-
-
 evaluateCV(clf, le, train_data, train_labels_featurized)
 
 print('*'*40)
 
-
-# In[ ]:
-
-
 # A check for the average F1 score
-
 f_scorer = make_scorer(fbeta_score, beta=0.5, average='macro')
 
 def evaluateCV_check(classifier, X, y, verbose=True):
@@ -363,16 +340,9 @@ def evaluateCV_check(classifier, X, y, verbose=True):
     print("Mean cv score (StratifiedKFold): ", scores.mean())
 
 
-# In[ ]:
-
-
 evaluateCV_check(clf, train_data, train_labels_featurized)
 
 print('*'*40)
-
-
-# In[ ]:
-
 
 ##################################################################################################
 # 4. TEST PREDICTIONS and ANALYSIS
@@ -382,9 +352,9 @@ print('*'*40)
 clf.fit(train_data, train_labels_featurized)
 
 # Predict on test set
-test_data, test_labels = load_data(test_file, verbose=False)
+test_data, test_labels = load_test_data(test_file, verbose=False)
 print("Test data successfully loaded.")
-print("{} sample in test_data".format(len(train_data)))
+print("{} samples in test_data".format(len(test_data)))
 print('*'*40)
 test_label_predicted = clf.predict(test_data)
 # print(len(test_label_predicted))
@@ -400,32 +370,6 @@ with open(outfile, 'w', encoding="utf-8") as f:
 
 print("Predictions written to file {}".format(outfile))
 print('*'*40)
-
-
-# In[ ]:
-
-# Not sure how to get this function to work with out pipeline at the moment.
-
-# Feature analysis - print N most informative
-# !! Make changes in this function when you change the pipleine!!
-# def printNMostInformative(classifier,label_encoder,N):
-#     """Prints features with the highest coefficient values, per class"""
-#     feature_names = classifier.named_steps['countvectorizer'].get_feature_names()
-#
-#     coef = classifier.named_steps['logisticregression'].coef_
-#     print(coef.shape)
-#     for rel in label_encoder.classes_:
-#         rel_id = label_encoder.transform([rel])[0]
-#         coef_rel = coef[rel_id]
-#         coefs_with_fns = sorted(zip(coef_rel, feature_names))
-#         top_features = coefs_with_fns[-N:]
-#         print("\nClass {} best: ".format(rel))
-#         for feat in top_features:
-#             print(feat)
-#
-# print("Top features used to predict: ")
-# # show the top features
-# printNMostInformative(clf,le,2)
 
 ###############################################################################
 ## End Code
