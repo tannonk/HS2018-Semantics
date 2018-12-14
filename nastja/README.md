@@ -1,4 +1,4 @@
-                        Precision   Recall    F-score
+                          Precision   Recall    F-score
 
 
 Baseline: clf = make_pipeline(CountVectorizer(), LogisticRegression())
