@@ -22,6 +22,9 @@
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats |	0.8721445323326972 |	best result but very time consuming |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats	| 0.869709024613503	| final result 10/12/18
 
+
+
+### Confusion Matrix
 ![Screenshot](image_preview.png)
 
 
