@@ -9,7 +9,7 @@
 | max_df=0.7  | 0.7801255472002808 |
 | word2vec (trained on our data) | 0.7004649820878264 | only entities are vectorized; tested on train data only |
 | pretrained word2vec | 0.5483315593034295 | context words vectorized (without entities; see more below |
-
+| |
 | BASELINE + EntityLength |	0.7818803012927732 |	unions features |
 | BASELINE + EntityLength + SimpleFeats |	0.8108522380368186 |	
 | BASELINE + EntityLength + SimpleFeats (with POS tags)	| 0.8279038078401164 |	
