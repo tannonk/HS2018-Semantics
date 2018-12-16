@@ -19,6 +19,11 @@
 | |
 | ngram range(1, 3) + splitting data | 0.850 | :boom: |
 | |
-| splitting data + ngram range(1, 3) + EntityLength + SimpleFeats |	0.8716350652593686 |	
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats + SyntacticFeats |	0.8721445323326972 |	best result but very time consuming |
 | splitting data + ngram range(1, 3) + EntityLength + SimpleFeats	| 0.869709024613503	| final result 10/12/18
+
+
+![GitHub Logo](/images/logo.png)
+Format: ![Alt Text](url)
+
+https://paper.dropbox.com/ep/redirect/image?url=https%3A%2F%2Fd2mxuefqeaa7sj.cloudfront.net%2Fs_B1C5BE07922D5334B939CC64F85A4319A12E8090D72A29939DBBE3DBB85164B7_1544866292918_image.png&hmac=JXPpjtYe9X5m9TnkPUtbF3zYm68cNRcMvy%2B%2Bs80RSWU%3D
