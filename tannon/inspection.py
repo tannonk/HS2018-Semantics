@@ -12,6 +12,32 @@ PairExample = namedtuple('PairExample',
 Snippet = namedtuple('Snippet',
     'left, mention_1, middle, mention_2, right, direction')
 
+def load_data(file, verbose=True):
+    f = open(file,'r', encoding='utf-8')
+    data = []
+    labels = []
+    for i,line in enumerate(f):
+        instance = json.loads(line)
+
+        instance_tuple = PairExample(instance['entity_1'],instance['entity_2'],[])
+
+        for snippet in instance['snippet']:
+            try:
+                snippet_tuple = Snippet(snippet['left'],snippet['mention_1'],snippet['middle'],
+                                   snippet['mention_2'],snippet['right'],
+                                    snippet['direction'])
+                instance_tuple.snippet.append(snippet_tuple)
+
+                data.append(instance_tuple)
+                labels.append(instance['relation'])
+                instance_tuple = PairExample(instance['entity_1'],instance['entity_2'],[])
+
+            except:
+                print(instance)
+
+    f.close()
+    return data,labels
+
 def load_test_data(file, verbose=True):
     f = open(file,'r', encoding='utf-8')
     data = []
@@ -40,6 +66,7 @@ def load_test_data(file, verbose=True):
         data.append(instance_tuple)
         labels.append(instance['relation'])
 
+    f.close()
     return data, labels
 
 def check_rels(test_data, test_labels, rel):
@@ -51,8 +78,11 @@ def check_rels(test_data, test_labels, rel):
             rel_count += 1
             unique_middle_segments.add(d.snippet[0].middle)
 
-    print("There are {} unique middle segments for the relation {} from {} samples.".format(len(unique_middle_segments), rel, rel_count))
+    # print("There are {} unique middle segments for the relation {} from {} samples.".format(len(unique_middle_segments), rel, rel_count))
 
+    proportion = len(unique_middle_segments)/rel_count
+
+    print("{:.2f}% of middle segments are unique for the relation {}".format(proportion, rel))
 
 test_data, test_labels = load_test_data(infile, verbose=False)
 rels = ["author", "worked_at", "has_spouse", "capital"]
